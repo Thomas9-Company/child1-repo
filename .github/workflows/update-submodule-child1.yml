@@ -1,0 +1,29 @@
+name: Send submodule child1 updates to parent repo
+
+on:
+  push:
+    branches: 
+      - main
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with: 
+          repository: Thomas9-Company/master-repo
+          token: ${{ secrets.MASTER_REPO_ACCESS_TOKEN }}
+          submodules: true
+
+      - name: Pull & update specific submodule (child1)
+        run: |
+          git submodule update --remote --merge --recursive models/child1
+
+      - name: Commit and push changes to master-repo
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions - update submodules"
+          git add --all
+          git commit -m "Update submodules to latest commit: child1" || echo "No changes to commit"
+          git push
